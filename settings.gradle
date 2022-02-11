@@ -1,0 +1,3 @@
+rootProject.name = 'badgemeal-backend'
+include 'repository-commons'
+include 'apis'

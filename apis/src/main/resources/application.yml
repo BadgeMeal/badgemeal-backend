@@ -3,13 +3,20 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mariadb://localhost:3306/badgemeal
+    url: jdbc:mariadb://tostit.i234.me:5003/badgeMeal
     driver-class-name: org.mariadb.jdbc.Driver
     username: badgemeal
-    password: badgemeal
+    password: badgemeal1!
   jpa:
     open-in-view: false
-    generate-ddl: false
+    generate-ddl: true
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+badgemeal:
+  kakao-app-key: ef4c9695a2239b88655c9ae82581aed8

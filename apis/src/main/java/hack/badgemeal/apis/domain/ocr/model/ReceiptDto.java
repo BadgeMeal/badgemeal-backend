@@ -1,4 +1,4 @@
-package hack.badgemeal.models.draw;
+package hack.badgemeal.apis.domain.ocr.model;
 
 import lombok.*;
 
@@ -7,5 +7,5 @@ import lombok.*;
 @Builder
 @ToString
 @AllArgsConstructor
-public class Menu {
+public class ReceiptDto {
 }

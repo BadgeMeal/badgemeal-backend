@@ -20,3 +20,8 @@ spring:
 
 badgemeal:
   kakao-app-key: ef4c9695a2239b88655c9ae82581aed8
+
+caver:
+  access-key-id : KASKQUNUUKKMP4ELRJCRJYPU
+  secret-access-key : rML5JEad6M8kOOd_9VofClY5pqTaNVmJxl105DBA
+  chain-id : 1001

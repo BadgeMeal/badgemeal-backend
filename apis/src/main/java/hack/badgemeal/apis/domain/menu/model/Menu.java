@@ -1,4 +1,4 @@
-package hack.badgemeal.apis.domain.draw.model;
+package hack.badgemeal.apis.domain.menu.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +19,8 @@ public class Menu {
     // 메뉴 ID
     @Id
     private long menuNo;
-    // 뽑기 횟수
-    private long count;
+    // 메뉴 타입
+    private String type;
+    // 메뉴 키워드
+    private String keyword;
 }

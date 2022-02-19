@@ -15,4 +15,9 @@ public class DrawController {
     public int getDrawCount(@RequestParam("address") String address) {
         return drawService.drawCount(address);
     }
+
+    @GetMapping("/draw/result")
+    public String getDrawResultIsVerified(@RequestParam("address") String address) {
+        return drawService.drawResultIsVerified(address);
+    }
 }

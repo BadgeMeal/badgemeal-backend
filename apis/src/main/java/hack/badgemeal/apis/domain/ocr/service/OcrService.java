@@ -1,6 +1,14 @@
 package hack.badgemeal.apis.domain.ocr.service;
 
 import hack.badgemeal.apis.common.constant.BadgemealConstant;
+import hack.badgemeal.apis.common.dto.ReceiptDto;
+import hack.badgemeal.apis.common.enums.ErrorCode;
+import hack.badgemeal.apis.common.enums.ResponseStatus;
+import hack.badgemeal.apis.common.exceptions.CustomException;
+import hack.badgemeal.apis.domain.menu.model.Menu;
+import hack.badgemeal.apis.domain.menu.repository.MenuRepository;
+import hack.badgemeal.apis.domain.ocr.model.OcrResponse;
+import hack.badgemeal.apis.domain.ocr.model.OcrResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +29,10 @@ import java.awt.image.PixelGrabber;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
@@ -29,13 +41,19 @@ import java.util.UUID;
 public class OcrService {
     @Value("${badgemeal.kakao-app-key}")
     private String APP_KEY;
-    @Value("classpath:tmp")
-    private String filePath;
+    private final MenuRepository menuRepository;
 
-    public String ocrVisionText(MultipartFile image) {
+    public ResponseStatus ocrVisionText(MultipartFile image, ReceiptDto receiptDto) {
         StringBuilder ext = new StringBuilder();
-//        String filePath = File.separator + "resources" + File.separator;
+        OcrResponse response = null;
+
         try {
+            Path temp = Files.createTempFile("", ".tmp");
+            String absolutePath = temp.toString();
+            String separator = FileSystems.getDefault().getSeparator();
+            String tempFilePath = absolutePath
+                    .substring(0, absolutePath.lastIndexOf(separator));
+
             BufferedImage in = ImageIO.read(convert(image, ext));
             BufferedImage resizedImage = null;
             BufferedImage ocrImage;
@@ -63,28 +81,43 @@ public class OcrService {
             String fileName = "ocrImage_" + UUID.randomUUID();
             ImageIO.write(ocrImage,
                     ext.toString(),
-                    new File("C:\\Users\\ChoiSY\\Documents\\" + fileName + "." + ext));
+                    new File(tempFilePath + fileName + "." + ext));
 
             WebClient webClient = WebClient.builder()
                     .baseUrl("https://dapi.kakao.com/v2")
                     .build();
 
-            return webClient.post()
+            response = webClient.post()
                     .uri("/vision/text/ocr")
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .header("authorization", "KakaoAK " + APP_KEY)
-                    .body(BodyInserters.fromMultipartData(fromFile(new File("C:\\Users\\ChoiSY\\Documents\\" + fileName + "." + ext))))
+                    .body(BodyInserters.fromMultipartData(fromFile(new File(tempFilePath + fileName + "." + ext))))
                     .retrieve()
-                    .bodyToMono(String.class)
+                    .bodyToMono(OcrResponse.class)
                     .block();
 
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
-            return "";
-        } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
-            return "";
+            return ResponseStatus.FAILED;
         }
+
+        // OCR 인식 결과에서 메뉴 키워드 검색
+        Menu menu = menuRepository.findById(receiptDto.getMenuNo())
+                .orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
+
+        String keyword = menu.getKeyword();
+
+        for (OcrResult result : response.getResult()) {
+            ArrayList<String> recogWords = result.getRecognition_words();
+
+            for (int i = 0; i < recogWords.size(); i++) {
+                if (recogWords.get(i).toUpperCase().contains(keyword)) {
+                    return ResponseStatus.SUCCESS;
+                }
+            }
+        }
+
+        return ResponseStatus.FAILED;
     }
 
     private static File convert(MultipartFile file, StringBuilder ext) throws IOException {
@@ -105,4 +138,6 @@ public class OcrService {
         builder.part("image", new FileSystemResource(file));
         return builder.build();
     }
+
+//    private static boolean findKeyword(Map<String, Object>)
 }

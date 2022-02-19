@@ -18,10 +18,4 @@ public class IpfsController {
     public String postIpfsImgUpload(@RequestParam("img") MultipartFile image) throws IOException {
         return ipfsService.uploadToIPFS(image);
     }
-
-
-    @GetMapping("/api/ipfs/download")
-    public String postIpfsImgUpload(@RequestParam("hash") String multihash) throws IOException {
-        return ipfsService.downloadFromIPFS(multihash);
-    }
 }

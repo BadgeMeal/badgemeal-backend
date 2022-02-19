@@ -1,4 +1,4 @@
-package hack.badgemeal.apis.domain.ocr.model;
+package hack.badgemeal.apis.common.dto;
 
 import lombok.*;
 
@@ -8,4 +8,6 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 public class ReceiptDto {
+//    private String address;
+    private long menuNo;
 }

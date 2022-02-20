@@ -1,7 +1,7 @@
 package hack.badgemeal.apis.common.exceptions.global;
 
 import hack.badgemeal.apis.common.exceptions.CustomException;
-import hack.badgemeal.apis.common.exceptions.ErrorResponse;
+import hack.badgemeal.apis.common.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;

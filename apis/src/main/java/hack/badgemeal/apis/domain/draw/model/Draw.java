@@ -22,8 +22,8 @@ public class Draw {
     private long count;
     // 뽑기 회차
     @ManyToOne
-    @JoinColumn(name = "draw_info_round")
-    private DrawInfo drawInfo;
+    @JoinColumn(name = "round_round")
+    private Round round;
     // 유저 ID
     @ManyToOne
     @JoinColumn(name = "user_address")

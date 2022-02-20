@@ -3,7 +3,9 @@ INSERT INTO badgeMeal.bm_user (address) VALUES ('0x414c8685bcfbef5524b5a6aa85915
 INSERT INTO badgeMeal.bm_user (address) VALUES ('0x9a46A47Ad641a47e0eB3500B28D80aE133FE0162');
 
 INSERT INTO badgeMeal.bm_round (round, date, is_now) VALUES (0, '2022-02-17', null);
-INSERT INTO badgeMeal.bm_round (round, date, is_now) VALUES (1, '2022-02-18', 'Y');
+INSERT INTO badgeMeal.bm_round (round, date, is_now) VALUES (1, '2022-02-18', null);
+INSERT INTO badgeMeal.bm_round (round, date, is_now) VALUES (2, '2022-02-19', null);
+INSERT INTO badgeMeal.bm_round (round, date, is_now) VALUES (3, '2022-02-20', 'Y');
 
 INSERT INTO badgeMeal.bm_draw (address, round, count) VALUES ('0x414c8685bcfbef5524b5a6aa859155d849529bab', 0, 0);
 INSERT INTO badgeMeal.bm_draw (address, round, count) VALUES ('0x9a46A47Ad641a47e0eB3500B28D80aE133FE0162', 0, 0);

@@ -8,6 +8,6 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 public class ReceiptDto {
-//    private String address;
+    private String address;
     private long menuNo;
 }

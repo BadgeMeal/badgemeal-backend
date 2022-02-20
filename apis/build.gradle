@@ -28,6 +28,8 @@ dependencies {
     /*caver-java*/
     implementation 'com.klaytn.caver:core:1.6.3'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
+    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
 }
 
 tasks.named('test') {

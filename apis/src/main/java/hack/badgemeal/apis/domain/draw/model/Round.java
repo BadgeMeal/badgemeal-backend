@@ -15,8 +15,8 @@ import javax.persistence.Table;
 @ToString
 @NoArgsConstructor
 @Entity
-@Table(name = "bm_draw_info")
-public class DrawInfo {
+@Table(name = "bm_round")
+public class Round {
     // 뽑기 회차
     @Id
     private long round;

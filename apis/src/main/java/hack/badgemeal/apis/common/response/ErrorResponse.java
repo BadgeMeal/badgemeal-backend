@@ -1,4 +1,4 @@
-package hack.badgemeal.apis.common.exceptions;
+package hack.badgemeal.apis.common.response;
 
 import hack.badgemeal.apis.common.enums.ErrorCode;
 import lombok.Builder;

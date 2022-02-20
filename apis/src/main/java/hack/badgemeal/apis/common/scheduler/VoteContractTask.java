@@ -1,6 +1,10 @@
 package hack.badgemeal.apis.common.scheduler;
 
 import hack.badgemeal.apis.common.util.CaverJava;
+import hack.badgemeal.apis.domain.menu.model.Menu;
+import hack.badgemeal.apis.domain.menu.repository.MenuRepository;
+import hack.badgemeal.apis.domain.menu.service.MenuService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -11,7 +15,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Calendar;
 
 @Component
+@RequiredArgsConstructor
 public class VoteContractTask {
+    private final MenuRepository menuRepository;
+
     @Value("${baobab-contract.vote-address}")
     private String voteConAddress;
     @Value("${baobab-contract.vote-abi}")
@@ -36,6 +43,10 @@ public class VoteContractTask {
             System.out.println("addWinnerProposal : " + result);
             if(!result.contains("The proposal did not win majority of the votes.")){
                 //db에 저장
+                Menu menu = new Menu();
+                menu.setKeyword(elected_menu);
+                menu.setKeyword(elected_menu);
+                menuRepository.save(menu);
             }
         }
     }
@@ -43,10 +54,7 @@ public class VoteContractTask {
     /*매달 1일 setVoteStartTime 실행*/
     @Scheduled(cron = "0 0 0 1 * *")
     public void voteStart() throws TransactionException, IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Calendar cal = Calendar.getInstance();
-        if(cal.getTime().getDate() == cal.getActualMaximum(Calendar.DAY_OF_MONTH)){
-            CaverJava caver = new CaverJava();
-            caver.callContractFunc(voteConAddress, voteConAbi, "setVoteStartTime");
-        }
+        CaverJava caver = new CaverJava();
+        caver.callContractFunc(voteConAddress, voteConAbi, "setVoteStartTime");
     }
 }

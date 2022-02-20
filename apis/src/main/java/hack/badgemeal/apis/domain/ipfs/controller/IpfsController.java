@@ -3,6 +3,8 @@ package hack.badgemeal.apis.domain.ipfs.controller;
 import hack.badgemeal.apis.common.dto.ResultDto;
 import hack.badgemeal.apis.domain.ipfs.service.IpfsService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;

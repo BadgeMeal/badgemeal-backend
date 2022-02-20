@@ -1,34 +1,22 @@
-package hack.badgemeal.apis;
+package hack.badgemeal.apis.common.scheduler;
 
 import hack.badgemeal.apis.domain.draw.model.Round;
 import hack.badgemeal.apis.domain.draw.repository.RoundRepository;
-import hack.badgemeal.apis.domain.menu.model.Menu;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@SpringBootTest
-class ApisApplicationTests {
+@Component
+@RequiredArgsConstructor
+public class RoundTask {
+    private final RoundRepository roundRepository;
 
-    @Autowired
-    RoundRepository roundRepository;
-
-    @Test
-    void contextLoads() {
-    }
-
-    @Test
-    void test() {
-        Menu menu = new Menu();
-        menu.setKeyword("떡볶이");
-        menu.setKeyword("떡볶이");
-    }
-
-    @Test
-    void roundTest() {
+    /*매일 자정 실행*/
+    @Scheduled(cron = "0 0 0 * * *")
+    public void setRound() {
         Round nowRound = roundRepository.findByIsNowIsNotNull();
         nowRound.setIsNow(' ');
         roundRepository.save(nowRound);

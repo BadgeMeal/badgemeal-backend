@@ -1,11 +1,13 @@
-package hack.badgemeal.apis.domain.draw.model;
+package hack.badgemeal.apis.domain.nft.model;
 
-import lombok.Getter;
+import hack.badgemeal.apis.domain.draw.model.DrawResult;
+import hack.badgemeal.apis.domain.draw.model.DrawResultKey;
+import lombok.Setter;
 
 import java.io.Serializable;
 
-@Getter
-public class DrawResultKey implements Serializable {
+@Setter
+public class NftCountKey implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String address;

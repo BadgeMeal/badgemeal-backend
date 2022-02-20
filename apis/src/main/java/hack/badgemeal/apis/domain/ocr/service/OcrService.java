@@ -4,19 +4,18 @@ import com.klaytn.caver.Caver;
 import com.klaytn.caver.abi.datatypes.Type;
 import com.klaytn.caver.contract.Contract;
 import hack.badgemeal.apis.common.constant.BadgemealConstant;
-import hack.badgemeal.apis.common.dto.ReceiptDto;
 import hack.badgemeal.apis.common.enums.ErrorCode;
 import hack.badgemeal.apis.common.enums.ResponseStatus;
+import hack.badgemeal.apis.common.enums.VerificationEnum;
 import hack.badgemeal.apis.common.exceptions.CustomException;
 import hack.badgemeal.apis.common.response.Message;
+import hack.badgemeal.apis.domain.draw.model.DrawResult;
 import hack.badgemeal.apis.domain.draw.model.Round;
+import hack.badgemeal.apis.domain.draw.repository.DrawResultRepository;
 import hack.badgemeal.apis.domain.draw.repository.RoundRepository;
 import hack.badgemeal.apis.domain.menu.model.Menu;
 import hack.badgemeal.apis.domain.menu.repository.MenuRepository;
-import hack.badgemeal.apis.domain.ocr.model.MetadataResponse;
-import hack.badgemeal.apis.domain.ocr.model.MintData;
-import hack.badgemeal.apis.domain.ocr.model.OcrResponse;
-import hack.badgemeal.apis.domain.ocr.model.OcrResult;
+import hack.badgemeal.apis.domain.ocr.model.*;
 import hack.badgemeal.apis.domain.ocr.repository.MintDataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,8 +67,9 @@ public class OcrService {
     private final MenuRepository menuRepository;
     private final MintDataRepository mintDataRepository;
     private final RoundRepository roundRepository;
+    private final DrawResultRepository drawResultRepository;
 
-    public ResponseEntity<Message> ocrVisionText(MultipartFile image, ReceiptDto receiptDto) {
+    public ResponseEntity<Message> ocrVisionText(VerifyReceiptRequestParam params) {
         StringBuilder ext = new StringBuilder();
         OcrResponse response = null;
         String fileFullPath = null;
@@ -81,7 +81,11 @@ public class OcrService {
             String tempFilePath = absolutePath
                     .substring(0, absolutePath.lastIndexOf(separator));
 
-            BufferedImage in = ImageIO.read(convert(image, ext));
+            if (params.getImage() == null) {
+                throw new CustomException(ErrorCode.RECEIPT_IMAGE_IS_EMPTY);
+            }
+
+            BufferedImage in = ImageIO.read(convert(params.getImage(), ext));
             BufferedImage resizedImage = null;
             BufferedImage ocrImage;
             int originWidth = in.getWidth();
@@ -133,7 +137,7 @@ public class OcrService {
         }
 
         // OCR 인식 결과에서 메뉴 키워드 검색
-        Menu menu = menuRepository.findById(receiptDto.getMenuNo())
+        Menu menu = menuRepository.findById(params.getMenuNo())
                 .orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
 
         boolean isFindKeyword = false;
@@ -160,6 +164,18 @@ public class OcrService {
 
         if (isFindKeyword) {
             int randomTokenId = 0;
+            Round nowRound = roundRepository.findByIsNowIsNotNull();
+
+            Optional<DrawResult> drawResult = drawResultRepository.findByAddressAndRound(params.getAddress(), nowRound.getRound());
+            if (drawResult.isPresent()) {
+                // 이미 현재 회차에 해당 주소로 발행된 메타데이터 URL이 있을 경우
+                if (drawResult.get().getMintData() != null) {
+                    throw new CustomException(ErrorCode.MINT_DATA_EXIST);
+                }
+            } else {
+                throw new CustomException(ErrorCode.DRAW_RESULT_NOT_FOUND);
+            }
+
             MetadataResponse metadataResponse = uploadReceiptMetadataKasApi(fileFullPath);
             try {
                 randomTokenId = getValidTokenId();
@@ -167,23 +183,29 @@ public class OcrService {
                 log.error(e.getMessage(), e);
                 throw new CustomException(ErrorCode.CAVER_OWNEROF_CALL);
             }
-            Round nowRound = roundRepository.findByIsNowIsNotNull();
-            if (!mintDataRepository.existsByAddressAndRound(receiptDto.getAddress(), nowRound.getRound())) {
-                MintData mintData = new MintData(receiptDto.getAddress(), nowRound.getRound(), randomTokenId, metadataResponse.getUri());
-                mintDataRepository.save(mintData);
-            } else {
-                throw new CustomException(ErrorCode.MINT_DATA_EXIST);
+
+            MintData mintData = null;
+            mintData = mintDataRepository.save(new MintData(0, randomTokenId, metadataResponse.getUri(), params.getAddress()));
+
+            if (drawResult.isPresent()) {
+                drawResult.get().setIsVerified('Y');
+                if (mintData == null) {
+                    throw new CustomException(ErrorCode.MINT_DATA_NOT_FOUND);
+                }
+                drawResult.get().setMintData(mintData);
+                drawResultRepository.save(drawResult.get());
             }
 
             return new ResponseEntity<>(
                     Message.builder().status(ResponseStatus.SUCCESS)
-                            .data(Map.of("tokenId", randomTokenId, "metadataUri", metadataResponse.getUri()))
+                            .data(Map.of("verification", VerificationEnum.TRUE, "tokenId", randomTokenId, "metadataUri", metadataResponse.getUri()))
                             .build(),
                     HttpStatus.OK);
         }
 
         return new ResponseEntity<>(
-                Message.builder().status(ResponseStatus.FAILED).build(),
+                Message.builder().status(ResponseStatus.SUCCESS)
+                        .data(Map.of("verification", VerificationEnum.FALSE)).build(),
                 HttpStatus.OK);
     }
 

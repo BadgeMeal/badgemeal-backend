@@ -68,11 +68,13 @@ public class DrawService {
     public DrawResult drawResult(DrawResultRequestParam params) {
         DrawResult drawResult = new DrawResult();
         Optional<Menu> menu = menuRepository.findById(params.getMenuNo());
+        Round nowRound = roundRepository.findByIsNowIsNotNull();
         if (!menu.isPresent()) {
             throw new CustomException(ErrorCode.MENU_NOT_FOUND);
         }
         drawResult.setAddress(params.getAddress());
         drawResult.setMenu(menu.get());
+        drawResult.setRound(nowRound.getRound());
         drawResult.setIsVerified('N');
         return drawResultRepository.save(drawResult);
     }

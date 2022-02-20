@@ -20,3 +20,9 @@ spring:
 
 badgemeal:
   kakao-app-key: ef4c9695a2239b88655c9ae82581aed8
+  caver:
+    chain-id: 1001
+    access-key-id: KASK3U5XOYDSTR9MNEXKMS0Q
+    secret-access-key: qRX-PhHnXfu-VNDst61Fv9PwIRMnJfFMWgV956Ci
+    nft-contract-address: "0xd973fD69C4940cAa0643Ec68E432B10E8Ff5cDAb"
+    vote-contract-address: "0xcd111D1eB01d1dDef42B7034b75676aEE1B1c90A"

@@ -3,7 +3,6 @@ package hack.badgemeal.apis.common.scheduler;
 import hack.badgemeal.apis.common.util.CaverJava;
 import hack.badgemeal.apis.domain.menu.model.Menu;
 import hack.badgemeal.apis.domain.menu.repository.MenuRepository;
-import hack.badgemeal.apis.domain.menu.service.MenuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -44,8 +43,7 @@ public class VoteContractTask {
             if(!result.contains("The proposal did not win majority of the votes.")){
                 //db에 저장
                 Menu menu = new Menu();
-                menu.setKeyword(elected_menu);
-                menu.setKeyword(elected_menu);
+                menu.setType(elected_menu);
                 menuRepository.save(menu);
             }
         }

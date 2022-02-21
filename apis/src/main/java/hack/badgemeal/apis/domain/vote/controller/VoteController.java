@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @Api(tags = {"(해커톤 시연용) 매달 말일, 매달 1일에 실행되는 Controller입니다."})
 @RestController
 @RequiredArgsConstructor
@@ -47,8 +45,7 @@ public class VoteController {
             if(!result.contains("The proposal did not win majority of the votes.")){
                 //db에 저장
                 Menu menu = new Menu();
-                menu.setKeyword(elected_menu);
-                menu.setKeyword(elected_menu);
+                menu.setType(elected_menu);
                 menuService.save(menu);
                 status =  "success";
             }

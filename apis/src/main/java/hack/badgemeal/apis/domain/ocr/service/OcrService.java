@@ -76,6 +76,7 @@ public class OcrService {
 
         try {
             Path temp = Files.createTempFile("", ".tmp");
+
             String absolutePath = temp.toString();
             String separator = FileSystems.getDefault().getSeparator();
             String tempFilePath = absolutePath
@@ -111,10 +112,12 @@ public class OcrService {
 
             String fileName = "ocrImage_" + UUID.randomUUID();
             fileFullPath = tempFilePath + File.separator + fileName + "." + ext;
+            File ocrFile = new File(fileFullPath);
+            ocrFile.deleteOnExit();
 
             ImageIO.write(ocrImage,
                     ext.toString(),
-                    new File(fileFullPath));
+                    ocrFile);
 
             WebClient webClient = WebClient.builder()
                     .baseUrl("https://dapi.kakao.com/v2")
@@ -136,12 +139,13 @@ public class OcrService {
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        // OCR 인식 결과에서 메뉴 키워드 검색
+        // OCR 인식 결과에서 메뉴 타입 검색
         Menu menu = menuRepository.findById(params.getMenuNo())
                 .orElseThrow(() -> new CustomException(ErrorCode.MENU_NOT_FOUND));
 
         boolean isFindKeyword = false;
-        String keyword = menu.getKeyword();
+        // 검색할 단어에서 공백 제거
+        String keyword = menu.getType().replaceAll(" ", "").toUpperCase();
 
         try {
             for (OcrResult result : Objects.requireNonNull(response).getResult()) {
@@ -149,7 +153,7 @@ public class OcrService {
                 ArrayList<String> recogWords = result.getRecognition_words();
 
                 for (int i = 0; i < recogWords.size(); i++) {
-                    if (recogWords.get(i).toUpperCase().contains(keyword)) {
+                    if (recogWords.get(i).replaceAll(" ", "").toUpperCase().contains(keyword)) {
                         isFindKeyword = true;
                         break;
                     }

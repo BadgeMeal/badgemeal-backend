@@ -78,6 +78,8 @@ public class OcrService {
         StringBuilder ext = new StringBuilder();
         OcrResponse response = null;
         String fileFullPath = null;
+        File ocrFile = null;
+        File convertFile = null;
 
         try {
             Path temp = Files.createTempFile("", ".tmp");
@@ -91,7 +93,8 @@ public class OcrService {
                 throw new CustomException(ErrorCode.RECEIPT_IMAGE_IS_EMPTY);
             }
 
-            BufferedImage in = ImageIO.read(convert(params.getImage(), ext));
+            convertFile = convert(params.getImage(), ext);
+            BufferedImage in = ImageIO.read(convertFile);
             BufferedImage resizedImage = null;
             BufferedImage ocrImage;
             int originWidth = in.getWidth();
@@ -117,8 +120,7 @@ public class OcrService {
 
             String fileName = "ocrImage_" + UUID.randomUUID();
             fileFullPath = tempFilePath + File.separator + fileName + "." + ext;
-            File ocrFile = new File(fileFullPath);
-            ocrFile.deleteOnExit();
+            ocrFile = new File(fileFullPath);
 
             ImageIO.write(ocrImage,
                     ext.toString(),
@@ -142,6 +144,14 @@ public class OcrService {
             new ResponseEntity<>(
                     Message.builder().status(ResponseStatus.FAILED).build(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
+        } finally {
+            if (ocrFile != null) {
+                ocrFile.delete();
+            }
+
+            if (convertFile != null) {
+                convertFile.delete();
+            }
         }
 
         // OCR 인식 결과에서 메뉴 타입 검색

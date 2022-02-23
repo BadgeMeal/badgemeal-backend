@@ -1,5 +1,7 @@
 package hack.badgemeal.apis.domain.ocr.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
 import com.klaytn.caver.abi.datatypes.Type;
 import com.klaytn.caver.contract.Contract;
@@ -7,6 +9,7 @@ import hack.badgemeal.apis.common.constant.BadgemealConstant;
 import hack.badgemeal.apis.common.enums.ErrorCode;
 import hack.badgemeal.apis.common.enums.ResponseStatus;
 import hack.badgemeal.apis.common.enums.VerificationEnum;
+import hack.badgemeal.apis.common.exceptions.BadRequestParamException;
 import hack.badgemeal.apis.common.exceptions.CustomException;
 import hack.badgemeal.apis.common.response.Message;
 import hack.badgemeal.apis.domain.draw.model.DrawResult;
@@ -47,6 +50,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.*;
 
@@ -171,16 +176,23 @@ public class OcrService {
             Round nowRound = roundRepository.findByIsNowIsNotNull();
 
             Optional<DrawResult> drawResult = drawResultRepository.findByAddressAndRound(params.getAddress(), nowRound.getRound());
-            if (drawResult.isPresent()) {
-                // 이미 현재 회차에 해당 주소로 발행된 메타데이터 URL이 있을 경우
-                if (drawResult.get().getMintData() != null) {
-                    throw new CustomException(ErrorCode.MINT_DATA_EXIST);
-                }
-            } else {
+            if (drawResult.isEmpty()) {
                 throw new CustomException(ErrorCode.DRAW_RESULT_NOT_FOUND);
             }
 
-            MetadataResponse metadataResponse = uploadReceiptMetadataKasApi(fileFullPath);
+            Menu drawResultMenu = drawResult.get().getMenu();
+            if (drawResultMenu == null) {
+                throw new CustomException(ErrorCode.DRAW_RESULT_NOT_FOUND);
+            }
+
+            MetadataResponse metadataResponse = null;
+            try {
+                metadataResponse = uploadReceiptMetadataKasApi(drawResultMenu);
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage(), e);
+                throw new BadRequestParamException("Upload Metadata Json 변환 과정 중 에러가 발생하였습니다.");
+            }
+
             try {
                 randomTokenId = getValidTokenId();
             } catch (Exception e) {
@@ -188,15 +200,14 @@ public class OcrService {
                 throw new CustomException(ErrorCode.CAVER_OWNEROF_CALL);
             }
 
-            MintData mintData = null;
-            mintData = mintDataRepository.save(new MintData(0, randomTokenId, metadataResponse.getUri(), params.getAddress()));
+            mintDataRepository.save(new MintData(params.getAddress(), randomTokenId, metadataResponse.getUri()));
 
             if (drawResult.isPresent()) {
                 drawResult.get().setIsVerified('Y');
-                if (mintData == null) {
-                    throw new CustomException(ErrorCode.MINT_DATA_NOT_FOUND);
-                }
-                drawResult.get().setMintData(mintData);
+//                if (mintData == null) {
+//                    throw new CustomException(ErrorCode.MINT_DATA_NOT_FOUND);
+//                }
+//                drawResult.get().setMintData(mintData);
                 drawResultRepository.save(drawResult.get());
             }
 
@@ -229,12 +240,6 @@ public class OcrService {
     public MultiValueMap<String, HttpEntity<?>> fromFileImage(File file) {
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("image", new FileSystemResource(file));
-        return builder.build();
-    }
-
-    public MultiValueMap<String, HttpEntity<?>> fromFile(File file) {
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("file", new FileSystemResource(file));
         return builder.build();
     }
 
@@ -276,20 +281,32 @@ public class OcrService {
         return new String(Files.readAllBytes(Paths.get(uri)));
     }
 
-    private MetadataResponse uploadReceiptMetadataKasApi(String fileFullPath) {
-        File imageFile = new File(fileFullPath);
+    private MetadataResponse uploadReceiptMetadataKasApi(Menu menu) throws JsonProcessingException {
+        LocalDateTime nowDate = LocalDateTime.now();
+        DateTimeFormatter nowDateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        MetadataBody metadataBody = new MetadataBody(
+                menu.getType() + " NFT", menu.getImageUrl(), nowDateFormat.format(nowDate));
+        Metadata metadataObj = new Metadata(metadataBody);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String metadata = objectMapper.writeValueAsString(metadataObj);
 
         WebClient webClient = WebClient.builder()
                 .baseUrl("https://metadata-api.klaytnapi.com/v1")
                 .build();
 
         MetadataResponse metadataResponse = webClient.post()
-                .uri("/metadata/asset")
+                .uri("/metadata")
                 .header("x-chain-id", chainId)
                 .header("authorization", Credentials.basic(accessKeyId, secretAccessKey))
-                .body(BodyInserters.fromMultipartData(fromFile(imageFile)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(metadata))
                 .retrieve()
                 .bodyToMono(MetadataResponse.class)
+                .onErrorMap(e -> {
+                    log.error(e.getMessage());
+                    return e;
+                })
                 .block();
 
         if (metadataResponse == null) {
@@ -298,4 +315,5 @@ public class OcrService {
 
         return metadataResponse;
     }
+
 }

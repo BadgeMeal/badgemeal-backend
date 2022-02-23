@@ -19,13 +19,13 @@ import java.io.IOException;
 public class IpfsController {
     private final IpfsService ipfsService;
 
-    @PostMapping("/upload")
-    public Object postIpfsImgUpload(@RequestParam("menu_no") Long menu_no, @RequestParam("img") MultipartFile image){
+    @PostMapping("/uploadMasterNftMetadata")
+    public Object postIpfsImgUpload(@RequestParam("menu_no") Long menu_no, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam("img") MultipartFile image){
         ResultDto resultDto = new ResultDto();
 
         String status = "fail";
         try{
-            resultDto = ipfsService.uploadToIPFS(menu_no, image);
+            resultDto = ipfsService.uploadToIPFS(menu_no, title, description, image);
         }catch (Exception e){
             e.printStackTrace();
             status =  "fail";
@@ -36,7 +36,7 @@ public class IpfsController {
         return resultDto;
     }
 
-    @GetMapping("/getMasterNftImage")
+    @GetMapping("/getMasterNftMetadata")
     public Object postIpfsImgUpload(@RequestParam("menu_no") Long menu_no){
          return ipfsService.getIpfsUrlByMenuNo(menu_no);
     }

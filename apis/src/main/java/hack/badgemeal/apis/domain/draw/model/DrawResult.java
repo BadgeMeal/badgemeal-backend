@@ -1,7 +1,6 @@
 package hack.badgemeal.apis.domain.draw.model;
 
 import hack.badgemeal.apis.domain.menu.model.Menu;
-import hack.badgemeal.apis.domain.ocr.model.MintData;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,8 +30,4 @@ public class DrawResult {
     @ManyToOne
     @JoinColumn(name = "menu_menu_no")
     private Menu menu;
-
-    @ManyToOne
-    @JoinColumn(name = "mint_data_mint_data_id")
-    private MintData mintData;
 }

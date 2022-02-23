@@ -6,10 +6,13 @@ import hack.badgemeal.apis.domain.draw.model.Round;
 import hack.badgemeal.apis.domain.draw.model.User;
 import hack.badgemeal.apis.domain.draw.repository.RoundRepository;
 import hack.badgemeal.apis.domain.draw.repository.UserRepository;
+import hack.badgemeal.apis.domain.nft.model.MintDataPostRequestParam;
 import hack.badgemeal.apis.domain.nft.model.NftMintCount;
 import hack.badgemeal.apis.domain.nft.model.NftMintCountGetRequestParam;
 import hack.badgemeal.apis.domain.nft.model.NftMintCountPutRequestParam;
 import hack.badgemeal.apis.domain.nft.repository.NftCountRepository;
+import hack.badgemeal.apis.domain.ocr.model.MintData;
+import hack.badgemeal.apis.domain.ocr.repository.MintDataRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +24,7 @@ public class NftService {
     private final RoundRepository roundRepository;
     private final UserRepository userRepository;
     private final NftCountRepository nftCountRepository;
+    private final MintDataRepository mintDataRepository;
 
     public int nftCount(NftMintCountGetRequestParam params) {
         int count = 0;
@@ -48,8 +52,30 @@ public class NftService {
             nftMintCount.setCount(params.getCount());
             return nftCountRepository.save(nftMintCount);
         } else {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
+    }
+
+    public MintData mintData(String address) {
+        Optional<MintData> mintData = mintDataRepository.findById(address);
+        if (mintData.isPresent()) {
+            return mintData.get();
+        } else {
+            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
+        }
+    }
+
+    public MintData postMintData(MintDataPostRequestParam param) {
+        return mintDataRepository.save(new MintData(param.getAddress(), param.getTokenId(), param.getImageUrl()));
+    }
+
+    public boolean initMintData(String address) {
+        Optional<MintData> mintData = mintDataRepository.findById(address);
+        if (mintData.isPresent()) {
+            mintDataRepository.deleteById(address);
+        }
+
+        return true;
     }
 
     private NftMintCount saveNftMintCount(String address, long round) {
@@ -60,5 +86,6 @@ public class NftService {
 
         return nftCountRepository.save(newNftMintCount);
     }
+
 
 }

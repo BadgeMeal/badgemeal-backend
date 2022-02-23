@@ -11,6 +11,8 @@ import com.klaytn.caver.transaction.response.TransactionReceiptProcessor;
 import com.klaytn.caver.transaction.type.ValueTransferMemo;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import hack.badgemeal.apis.common.dto.ResultDto;
+import hack.badgemeal.apis.common.enums.ErrorCode;
+import hack.badgemeal.apis.common.exceptions.CustomException;
 import hack.badgemeal.apis.domain.ipfs.model.MasterNFT;
 import hack.badgemeal.apis.domain.ipfs.repository.IpfsRepository;
 import hack.badgemeal.apis.domain.ocr.model.MetadataResponse;
@@ -96,8 +98,11 @@ public class IpfsService {
             masterNFT.setMenuNo(menu_no);
             masterNFT.setImageUrl(meata_data);
 
+            if (metadataResponse == null) {
+                throw new CustomException(ErrorCode.KAS_METADATA_API);
+            }
 
-            Optional<MasterNFT> checkMasterNFT = ipfsRepository.findByImageUrl(img_url);
+            Optional<MasterNFT> checkMasterNFT = ipfsRepository.findByImageUrl(meata_data);
             if(!checkMasterNFT.isPresent()){
                 ipfsRepository.save(masterNFT);
                 status = "success";

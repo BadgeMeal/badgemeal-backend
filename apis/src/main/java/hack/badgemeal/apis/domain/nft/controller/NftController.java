@@ -1,9 +1,6 @@
 package hack.badgemeal.apis.domain.nft.controller;
 
-import hack.badgemeal.apis.domain.nft.model.MintDataPostRequestParam;
-import hack.badgemeal.apis.domain.nft.model.NftMintCount;
-import hack.badgemeal.apis.domain.nft.model.NftMintCountGetRequestParam;
-import hack.badgemeal.apis.domain.nft.model.NftMintCountPutRequestParam;
+import hack.badgemeal.apis.domain.nft.model.*;
 import hack.badgemeal.apis.domain.nft.service.NftService;
 import hack.badgemeal.apis.domain.ocr.model.MintData;
 import io.swagger.annotations.Api;
@@ -35,7 +32,7 @@ public class NftController {
     @ApiImplicitParam(name = "address", dataType = "String", defaultValue = "0x0000000000000000000000000000000000000000", example = "0x0000000000000000000000000000000000000000")
     @ApiOperation(value = "해당 주소에 매핑된 Mint Data를 조회합니다.")
     @GetMapping("/mintData")
-    public MintData getMintData(@RequestParam("address") String address) {
+    public MintDataResponse getMintData(@RequestParam("address") String address) {
         return nftService.mintData(address);
     }
 

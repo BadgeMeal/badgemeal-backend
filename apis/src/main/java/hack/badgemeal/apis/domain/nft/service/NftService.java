@@ -2,22 +2,25 @@ package hack.badgemeal.apis.domain.nft.service;
 
 import hack.badgemeal.apis.common.enums.ErrorCode;
 import hack.badgemeal.apis.common.exceptions.CustomException;
+import hack.badgemeal.apis.domain.draw.model.DrawResult;
 import hack.badgemeal.apis.domain.draw.model.Round;
 import hack.badgemeal.apis.domain.draw.model.User;
+import hack.badgemeal.apis.domain.draw.repository.DrawResultRepository;
 import hack.badgemeal.apis.domain.draw.repository.RoundRepository;
 import hack.badgemeal.apis.domain.draw.repository.UserRepository;
-import hack.badgemeal.apis.domain.nft.model.MintDataPostRequestParam;
-import hack.badgemeal.apis.domain.nft.model.NftMintCount;
-import hack.badgemeal.apis.domain.nft.model.NftMintCountGetRequestParam;
-import hack.badgemeal.apis.domain.nft.model.NftMintCountPutRequestParam;
+import hack.badgemeal.apis.domain.menu.model.Menu;
+import hack.badgemeal.apis.domain.menu.repository.MenuRepository;
+import hack.badgemeal.apis.domain.nft.model.*;
 import hack.badgemeal.apis.domain.nft.repository.NftCountRepository;
 import hack.badgemeal.apis.domain.ocr.model.MintData;
 import hack.badgemeal.apis.domain.ocr.repository.MintDataRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class NftService {
@@ -25,6 +28,8 @@ public class NftService {
     private final UserRepository userRepository;
     private final NftCountRepository nftCountRepository;
     private final MintDataRepository mintDataRepository;
+    private final DrawResultRepository drawResultRepository;
+    private final MenuRepository menuRepository;
 
     public int nftCount(NftMintCountGetRequestParam params) {
         int count = 0;
@@ -56,13 +61,33 @@ public class NftService {
         }
     }
 
-    public MintData mintData(String address) {
+    public MintDataResponse mintData(String address) {
+        MintDataResponse mintDataResponse = new MintDataResponse();
+        Round nowRound = roundRepository.findByIsNowIsNotNull();
         Optional<MintData> mintData = mintDataRepository.findById(address);
-        if (mintData.isPresent()) {
-            return mintData.get();
+        Optional<DrawResult> drawResult = drawResultRepository.findByAddressAndRound(address, nowRound.getRound());
+
+        if (drawResult.isPresent()) {
+            if (drawResult.get().getMenu() != null) {
+                Optional<Menu> menu = menuRepository.findById(drawResult.get().getMenu().getMenuNo());
+                mintDataResponse.setMenuType(menu.get().getType());
+            } else {
+                log.error("해당 주소의 뽑기 결과에 매핑된 메뉴가 존재하지 않습니다.");
+                throw new CustomException(ErrorCode.DATA_NOT_FOUND);
+            }
         } else {
+            log.error("해당 주소의 뽑기 결과가 존재하지 않습니다.");
             throw new CustomException(ErrorCode.DATA_NOT_FOUND);
         }
+
+        if (mintData.isPresent()) {
+            mintDataResponse.setMintdata(mintData.get());
+        } else {
+            log.error("해당 주소로 매핑된 MintData가 존재하지 않습니다.");
+            throw new CustomException(ErrorCode.DATA_NOT_FOUND);
+        }
+
+        return mintDataResponse;
     }
 
     public MintData postMintData(MintDataPostRequestParam param) {

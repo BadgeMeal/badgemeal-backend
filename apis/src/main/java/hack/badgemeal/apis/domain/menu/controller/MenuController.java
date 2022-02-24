@@ -1,6 +1,7 @@
 package hack.badgemeal.apis.domain.menu.controller;
 
 import hack.badgemeal.apis.domain.menu.model.Menu;
+import hack.badgemeal.apis.domain.menu.model.MenuRequestParam;
 import hack.badgemeal.apis.domain.menu.service.MenuService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +28,12 @@ public class MenuController {
     @PostMapping("/menus")
     public List<Menu> postMenuList(@RequestBody List<Menu> menuList) {
         return menuService.postMenuList(menuList);
+    }
+
+    @ApiOperation(value = "메뉴를 저장합니다. (with IPFS 업로드)")
+    @PostMapping("/menu")
+    public Menu postMenu(MenuRequestParam menu) {
+        return menuService.postMenu(menu);
     }
 
     @ApiOperation(value = "메뉴를 수정합니다.")

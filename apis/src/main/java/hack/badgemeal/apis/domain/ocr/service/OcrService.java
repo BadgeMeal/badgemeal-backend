@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Credentials;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -41,11 +42,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.PixelGrabber;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
-import java.net.URL;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -259,8 +257,33 @@ public class OcrService {
         httpService.addHeader("x-chain-id", chainId);
         Caver caver = new Caver(httpService);
 
-        URL resource = OcrService.class.getResource("/abi/MintBadgemealNFT_abi.json");
-        String abi = readFileAsString(resource.toURI());
+        String nftAbiFilePath = "/abi/MintBadgemealNFT_abi.json";
+        String abi = "";
+        ClassPathResource classPathResource = new ClassPathResource(nftAbiFilePath);
+
+        if(classPathResource.exists() == false){
+            log.error("Invalid filePath : {}", nftAbiFilePath);
+            throw new IllegalArgumentException();
+        }
+        log.info("file path exists = {}", classPathResource.exists());
+
+        try (InputStream is = new BufferedInputStream(classPathResource.getInputStream())) {
+            String encoding = "UTF-8";
+
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            byte[] byteSize = new byte[1024];
+
+            int length;
+            while ((length = is.read(byteSize)) != -1) {
+                byteArrayOutputStream.write(byteSize, 0, length);
+            }
+
+            abi = byteArrayOutputStream.toString(encoding);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new IOException();
+        }
+
         Contract nftContract = caver.contract.create(abi, nftContractAddress);
 
         boolean isTokenIdUniq = false;

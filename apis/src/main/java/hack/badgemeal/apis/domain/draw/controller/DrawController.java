@@ -38,6 +38,12 @@ public class DrawController {
         return drawService.drawResultIsVerified(drawRequestParam);
     }
 
+    @ApiOperation(value = "해당 주소의 랜덤 뽑기 메뉴 번호를 조회합니다.")
+    @GetMapping("/draw/menuNo")
+    public ResponseEntity<?> getDrawMenuNo(DrawRequestParam drawRequestParam) {
+        return drawService.drawMenuNo(drawRequestParam);
+    }
+
     @ApiOperation(value = "해당 주소의 랜덤 뽑기 결과를 저장합니다.")
     @PostMapping("/draw/result")
     public DrawResult postDrawResult(DrawResultRequestParam drawResultRequestParam) {

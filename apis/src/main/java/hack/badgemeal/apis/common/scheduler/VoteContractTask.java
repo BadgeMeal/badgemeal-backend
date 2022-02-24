@@ -26,8 +26,9 @@ public class VoteContractTask {
     @Value("${baobab-contract.nft-address}")
     private String nftConAddress;
 
-    /*매달 말일  실행*/
-    @Scheduled(cron = "0 0 0 28-31 * *")
+    /*매달 말일  실행
+    @Scheduled(cron = "0 0 0 28-31 * *")*/
+    @Scheduled(cron = "0 0 0 24-23/2 * *")
     public void proposeStart() throws TransactionException, IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Calendar cal = Calendar.getInstance();
         if(cal.getTime().getDate() == cal.getActualMaximum(Calendar.DAY_OF_MONTH)){
@@ -49,8 +50,9 @@ public class VoteContractTask {
         }
     }
 
-    /*매달 1일 setVoteStartTime 실행*/
-    @Scheduled(cron = "0 0 0 1 * *")
+    /*매달 1일 setVoteStartTime 실행
+    @Scheduled(cron = "0 0 0 1 * *")*/
+    @Scheduled(cron = "0 0 0 25-24/2 * *")
     public void voteStart() throws TransactionException, IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         CaverJava caver = new CaverJava();
         caver.callContractFunc(voteConAddress, voteConAbi, "setVoteStartTime");

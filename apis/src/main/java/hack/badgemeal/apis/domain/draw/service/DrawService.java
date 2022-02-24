@@ -93,6 +93,28 @@ public class DrawService {
                 HttpStatus.OK);
     }
 
+    public ResponseEntity<?> drawMenuNo(DrawRequestParam params) {
+        int menuNo = -1;
+        Round nowRound = roundRepository.findByIsNowIsNotNull();
+        Optional<DrawResult> drawResult = drawResultRepository.findByAddressAndRound(params.getAddress(), nowRound.getRound());
+
+        if (drawResult.isPresent()) {
+            Menu menu = drawResult.get().getMenu();
+            if (menu != null) {
+                menuNo = (int) menu.getMenuNo();
+            }
+            return new ResponseEntity<>(
+                    Message.builder().status(ResponseStatus.SUCCESS)
+                            .data(Map.of("menuNo", menuNo)).build(),
+                    HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(
+                Message.builder().status(ResponseStatus.SUCCESS)
+                        .data(Map.of("verification", VerificationEnum.FALSE, "menuNo", menuNo)).build(),
+                HttpStatus.OK);
+    }
+
     public DrawResult drawResult(DrawResultRequestParam params) {
         DrawResult drawResult = new DrawResult();
         Optional<Menu> menu = menuRepository.findById(params.getMenuNo());

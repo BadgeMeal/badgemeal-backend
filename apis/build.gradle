@@ -36,6 +36,9 @@ dependencies {
 
     implementation group: 'org.web3j', name: 'core', version: '4.8.4'
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.0'
+    
+    implementation group: 'net.minidev', name: 'json-smart', version: '2.4.7'
+    implementation group: 'net.minidev', name: 'asm', version: '1.0.2'
 
 
 }

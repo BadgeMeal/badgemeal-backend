@@ -22,6 +22,7 @@ public enum ErrorCode {
     MINT_DATA_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "Mint Data 저장이 실패하였습니다."),
     MINT_DATA_EXIST(HttpStatus.INTERNAL_SERVER_ERROR, "현재 회차, 해당 주소에 매핑된 메타데이터가 이미 존재합니다."),
     RECEIPT_IMAGE_IS_EMPTY(HttpStatus.INTERNAL_SERVER_ERROR, "첨부된 이미지 파일이 없습니다."),
+    IPFS_IMAGE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "IPFS 이미지 업로드에 실패하였습니다."),
     DRAW_PUT_COUNT_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "랜덤 뽑기 수정 횟수가 이전 횟수보다 2 이상 클 수 없습니다.");
 
     private final HttpStatus httpStatus;

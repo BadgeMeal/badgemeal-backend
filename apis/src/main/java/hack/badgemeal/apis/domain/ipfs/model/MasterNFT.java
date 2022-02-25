@@ -28,6 +28,8 @@ public class MasterNFT implements Serializable{
     private long menuNo;
     // 마스터 nft url
     private String imageUrl;
+    // ipfs cid(고유 key)
+    private String cid;
     // 발행여부
     @Column(name="mint_yn", columnDefinition = "TINYINT", length=1)
     private long mintYn;

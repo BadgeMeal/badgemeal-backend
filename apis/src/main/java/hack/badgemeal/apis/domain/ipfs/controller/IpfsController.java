@@ -1,11 +1,13 @@
 package hack.badgemeal.apis.domain.ipfs.controller;
 
 import hack.badgemeal.apis.common.dto.ResultDto;
+import hack.badgemeal.apis.common.response.Message;
 import hack.badgemeal.apis.domain.ipfs.service.IpfsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,24 +22,12 @@ public class IpfsController {
     private final IpfsService ipfsService;
 
     @PostMapping("/uploadMasterNftMetadata")
-    public Object postIpfsImgUpload(@RequestParam("menu_no") Long menu_no, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam("img") MultipartFile image){
-        ResultDto resultDto = new ResultDto();
-
-        String status = "fail";
-        try{
-            resultDto = ipfsService.uploadToIPFS(menu_no, title, description, image);
-        }catch (Exception e){
-            e.printStackTrace();
-            status =  "fail";
-            resultDto.setMsg(e.getMessage());
-        }
-
-        resultDto.setStatus(status);
-        return resultDto;
+    public ResponseEntity<Message> uploadMasterNftMetadata(@RequestParam("menu_no") Long menu_no, @RequestParam("title") String title, @RequestParam("description") String description, @RequestParam("img") MultipartFile image){
+        return ipfsService.uploadToIPFS(menu_no, title, description, image);
     }
 
     @GetMapping("/getMasterNftMetadata")
-    public Object postIpfsImgUpload(@RequestParam("menu_no") Long menu_no){
+    public ResponseEntity<Message> getMasterNftMetadata(@RequestParam("menu_no") Long menu_no){
          return ipfsService.getIpfsUrlByMenuNo(menu_no);
     }
 }

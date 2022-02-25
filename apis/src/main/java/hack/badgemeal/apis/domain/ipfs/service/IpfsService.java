@@ -12,7 +12,10 @@ import com.klaytn.caver.transaction.type.ValueTransferMemo;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
 import hack.badgemeal.apis.common.dto.ResultDto;
 import hack.badgemeal.apis.common.enums.ErrorCode;
+import hack.badgemeal.apis.common.enums.ResponseStatus;
+import hack.badgemeal.apis.common.enums.VerificationEnum;
 import hack.badgemeal.apis.common.exceptions.CustomException;
+import hack.badgemeal.apis.common.response.Message;
 import hack.badgemeal.apis.domain.ipfs.model.MasterNFT;
 import hack.badgemeal.apis.domain.ipfs.repository.IpfsRepository;
 import hack.badgemeal.apis.domain.ocr.model.MetadataResponse;
@@ -21,7 +24,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import okhttp3.Credentials;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -36,6 +41,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -48,13 +54,10 @@ public class IpfsService {
     private String accessKeyId;
     @Value("${caver.secret-access-key}")
     private String secretAccessKey;
-    @Value("${caver.chain-id}")
+    @Value("${badgemeal.caver.chain-id}")
     private String chainId;
 
-    public ResultDto uploadToIPFS(Long menu_no, String title, String description, MultipartFile image) {
-        ResultDto resultDto = new ResultDto();
-        String status = "fail";
-
+    public ResponseEntity<Message> uploadToIPFS(Long menu_no, String title, String description, MultipartFile image) {
         try{
             String ipfs_server = "ipfs.infura.io";
             HttpService httpService = new HttpService("https://node-api.klaytnapi.com/v1/klaytn");
@@ -92,38 +95,34 @@ public class IpfsService {
                     .bodyToMono(MetadataResponse.class)
                     .block();
 
-            String meata_data = metadataResponse.getUri();
+            String meta_data = metadataResponse.getUri();
 
             MasterNFT masterNFT = new MasterNFT();
             masterNFT.setMenuNo(menu_no);
-            masterNFT.setImageUrl(meata_data);
+            masterNFT.setImageUrl(meta_data);
 
             if (metadataResponse == null) {
                 throw new CustomException(ErrorCode.KAS_METADATA_API);
             }
 
-            Optional<MasterNFT> checkMasterNFT = ipfsRepository.findByImageUrl(meata_data);
+            Optional<MasterNFT> checkMasterNFT = ipfsRepository.findByImageUrl(meta_data);
             if(!checkMasterNFT.isPresent()){
                 ipfsRepository.save(masterNFT);
-                status = "success";
+                return new ResponseEntity<>(
+                        Message.builder().status(ResponseStatus.SUCCESS)
+                                .data(Map.of("msg", "saved")).build(),
+                        HttpStatus.OK);
             }else{
-                status = "fail";
-                resultDto.setMsg("already registered");
+                throw new CustomException(ErrorCode.DUPLICATE_RESOURCE);
             }
 
         }catch (Exception e){
             e.printStackTrace();
-            status = "fail";
-            resultDto.setMsg(e.getMessage());
+            throw new CustomException(ErrorCode.KAS_API);
         }
-
-        resultDto.setStatus(status);
-
-        return resultDto;
     }
 
-    public ResultDto getIpfsUrlByMenuNo (Long menu_no){
-        ResultDto resultDto = new ResultDto();
+    public ResponseEntity<Message> getIpfsUrlByMenuNo (Long menu_no){
 
         String result = null;
         List<MasterNFT> masterNFT = ipfsRepository.findByMenuNoAndMintYn(menu_no, 0L);
@@ -131,14 +130,13 @@ public class IpfsService {
             result = masterNFT.get(0).getImageUrl();
             masterNFT.get(0).setMintYn(1);
             ipfsRepository.save(masterNFT.get(0));
-            resultDto.setStatus("success");
-            resultDto.setResult(result);
+            return new ResponseEntity<>(
+                    Message.builder().status(ResponseStatus.SUCCESS)
+                            .data(Map.of("result", result)).build(),
+                    HttpStatus.OK);
         }else{
-            resultDto.setStatus("fail");
-            resultDto.setMsg("There's no NFT Image.");
+            throw new CustomException(ErrorCode.MASTER_NFT_IMG_NOT_FOUND);
         }
-
-        return resultDto;
     }
 
 

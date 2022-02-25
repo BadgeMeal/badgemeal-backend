@@ -11,6 +11,7 @@ public enum ErrorCode {
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 메뉴 정보를 찾을 수 없습니다."),
     DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 주소에 매핑된 정보를 찾을 수 없습니다."),
     DRAW_RESULT_NOT_FOUND(HttpStatus.NOT_FOUND, "현재 회차, 해당 주소에 매핑된 뽑기 결과가 존재하지 않습니다."),
+    MASTER_NFT_IMG_NOT_FOUND(HttpStatus.NOT_FOUND, "마스터 NFT 일러스트가 없습니다."),
 
     /* 409 CONFLICT */
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "데이터가 이미 존재합니다."),

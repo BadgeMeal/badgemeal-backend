@@ -26,13 +26,6 @@ public class IpfsController {
         return ipfsService.uploadToIPFS(menu_no, title, description, image);
     }
 
-    @GetMapping("/uploadMasterNftMetadata")
-    public void uploadMasterNftMetadata(@RequestParam("pw") String pw){
-        if(pw.equals("hk0129")){
-            ipfsService.uploadAllNFT();
-        }
-    }
-
     @GetMapping("/getMasterNftMetadata")
     public ResponseEntity<Message> getMasterNftMetadata(@RequestParam("menu_no") Long menu_no){
          return ipfsService.getIpfsUrlByMenuNo(menu_no);

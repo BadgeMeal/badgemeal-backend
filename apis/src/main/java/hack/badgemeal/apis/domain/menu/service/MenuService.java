@@ -31,7 +31,7 @@ public class MenuService {
     private final MenuRepository menuRepository;
 
     public List<Menu> getMenuList() {
-        return menuRepository.findAll();
+        return menuRepository.findAllByMenuNoNotLike(0);
     }
 
     public List<Menu> postMenuList(List<Menu> menuList) {

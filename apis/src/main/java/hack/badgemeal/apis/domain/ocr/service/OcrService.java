@@ -137,6 +137,8 @@ public class OcrService {
                     .bodyToMono(OcrResponse.class)
                     .block();
 
+            log.info(response.toString());
+
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);
             new ResponseEntity<>(

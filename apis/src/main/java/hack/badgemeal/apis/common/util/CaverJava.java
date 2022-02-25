@@ -35,7 +35,7 @@ public class CaverJava {
     }
 
     private static String chainId;
-    @Value("${caver.chain-id}")
+    @Value("${badgemeal.caver.chain-id}")
     public void setchainId(String id) {
         chainId = id;
     }

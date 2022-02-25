@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class VoteController {
     private final MenuService menuService;
 
-    @Value("${baobab-contract.vote-address}")
+    @Value("${cypress-contract.vote-address}")
     private String voteConAddress;
-    @Value("${baobab-contract.vote-abi}")
+    @Value("${cypress-contract.vote-abi}")
     private String voteConAbi;
 
-    @Value("${baobab-contract.nft-address}")
+    @Value("${cypress-contract.nft-address}")
     private String nftConAddress;
 
     /*매달 말일  실행 (end vote = start Proposal)*/

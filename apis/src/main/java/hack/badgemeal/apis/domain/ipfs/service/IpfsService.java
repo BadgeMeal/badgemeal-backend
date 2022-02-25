@@ -22,24 +22,28 @@ import hack.badgemeal.apis.domain.ocr.model.MetadataResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
 import okhttp3.Credentials;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.web3j.protocol.http.HttpService;
 import reactor.util.LinkedMultiValueMap;
 import reactor.util.MultiValueMap;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -100,12 +104,13 @@ public class IpfsService {
             MasterNFT masterNFT = new MasterNFT();
             masterNFT.setMenuNo(menu_no);
             masterNFT.setImageUrl(meta_data);
+            masterNFT.setCid(cid);
 
             if (metadataResponse == null) {
                 throw new CustomException(ErrorCode.KAS_METADATA_API);
             }
 
-            Optional<MasterNFT> checkMasterNFT = ipfsRepository.findByImageUrl(meta_data);
+            Optional<MasterNFT> checkMasterNFT = ipfsRepository.findByCid(cid);
             if(!checkMasterNFT.isPresent()){
                 ipfsRepository.save(masterNFT);
                 return new ResponseEntity<>(

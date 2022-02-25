@@ -62,7 +62,7 @@
 #### MasterNFT API
 
 - **GET** `/ipfs/getMasterNftMetadata`
-  - 파라미터 메뉴 번호에 해당하는 MasterNFT의 IPFS 이미지 URL을 조회합니다.
+  - 파라미터 메뉴 번호에 해당하는 MasterNFT의 메타 데이터를 조회합니다.
 - **POST** `/ipfs/uploadMasterNftMetadata`
   - 파라미터 메뉴 번호에 매핑되는 MasterNFT의 이미지를 IPFS에 업로드합니다.
   - 추가로 title, description, imageUrl(IPFS)을 메타데이터로 업로드 합니다.
@@ -70,7 +70,7 @@
 #### Vote API (해커톤 시연용)
 
 - **GET** `/vote/endVote`
-  - 투표를 종료합니다.
+  - 투표를 종료하고 NFT 소유자들이 메뉴 제안을 시작합니다.
 - **GET** `/vote/voteStart`
   - 투표를 시작합니다.
 

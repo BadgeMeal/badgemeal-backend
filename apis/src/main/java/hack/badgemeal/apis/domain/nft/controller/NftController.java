@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = {"NFT API"})
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin("*")
 @RequestMapping("api")
 public class NftController {
     private final NftService nftService;

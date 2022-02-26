@@ -110,11 +110,29 @@ public class IpfsService {
         List<MasterNFT> masterNFT = ipfsRepository.findByMenuNoAndMintYn(menu_no, 0L);
         if(masterNFT.size() > 0){
             result = masterNFT.get(0).getImageUrl();
-            masterNFT.get(0).setMintYn(1);
-            ipfsRepository.save(masterNFT.get(0));
+            String cid = masterNFT.get(0).getCid();
+            
+            
             return new ResponseEntity<>(
                     Message.builder().status(ResponseStatus.SUCCESS)
-                            .data(Map.of("result", result)).build(),
+                            .data(Map.of("metaData", result, "cid", cid)).build(),
+                    HttpStatus.OK);
+        }else{
+            throw new CustomException(ErrorCode.MASTER_NFT_IMG_NOT_FOUND);
+        }
+    }
+    
+    public ResponseEntity<Message> setMintedMasterNft (String cid){
+        String result = null;
+        MasterNFT masterNFT = ipfsRepository.findByCidAndMintYn(cid, 0L);
+        
+        if(masterNFT != null){
+            masterNFT.setMintYn(1);
+            ipfsRepository.save(masterNFT);
+            
+            return new ResponseEntity<>(
+                    Message.builder().status(ResponseStatus.SUCCESS)
+                            .data(Map.of("status", "success")).build(),
                     HttpStatus.OK);
         }else{
             throw new CustomException(ErrorCode.MASTER_NFT_IMG_NOT_FOUND);
@@ -124,3 +142,4 @@ public class IpfsService {
 
 
 }
+

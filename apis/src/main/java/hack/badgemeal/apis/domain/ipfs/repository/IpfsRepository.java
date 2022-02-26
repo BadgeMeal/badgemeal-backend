@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface IpfsRepository extends JpaRepository<MasterNFT, Long> {
     List<MasterNFT> findByMenuNoAndMintYn(Long menu_no, Long mint_yn);
+    MasterNFT findByCidAndMintYn(String cid, Long mint_yn);
     Optional<MasterNFT> findByImageUrl(String image_url);
     Optional<MasterNFT> findByCid(String cid);
 }
+

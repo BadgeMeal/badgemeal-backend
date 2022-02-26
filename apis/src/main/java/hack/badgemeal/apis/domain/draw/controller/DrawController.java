@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = {"랜덤 뽑기 API"})
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin("*")
 @RequestMapping("api")
 public class DrawController {
     private final DrawService drawService;

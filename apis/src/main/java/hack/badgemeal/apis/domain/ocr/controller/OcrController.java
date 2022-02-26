@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Api(tags = {"메뉴 인증 API"})
 @RestController
+@CrossOrigin("*")
 @RequiredArgsConstructor
 public class OcrController {
     private final OcrService ocrService;

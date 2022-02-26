@@ -13,6 +13,7 @@ import java.util.List;
 @Api(tags = {"메뉴 API"})
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin("*")
 @RequestMapping("api")
 public class MenuController {
     private final MenuService menuService;

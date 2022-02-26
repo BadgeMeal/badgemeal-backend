@@ -16,6 +16,7 @@ import java.io.IOException;
 @Api(tags = {"IPFS에 MasterNFT 이미지를 업로드하고 DB에 저장해 관리하는 Controller"})
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin("*")
 @RequestMapping("ipfs")
 public class IpfsController {
     private final IpfsService ipfsService;

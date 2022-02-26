@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api(tags = {"(해커톤 시연용) 매달 말일, 매달 1일에 실행되는 Controller입니다."})
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin("*")
 @RequestMapping("vote")
 public class VoteController {
     private final MenuService menuService;

@@ -29,4 +29,9 @@ public class IpfsController {
     public ResponseEntity<Message> getMasterNftMetadata(@RequestParam("menu_no") Long menu_no){
          return ipfsService.getIpfsUrlByMenuNo(menu_no);
     }
+    @PutMapping("/setMintedMasterNft")
+    public ResponseEntity<Message> setMintedMasterNft(@RequestParam("cid") String cid){
+         return ipfsService.setMintedMasterNft(cid);
+    }
 }
+
